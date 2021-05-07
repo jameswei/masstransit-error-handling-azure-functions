@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MasstransitErrorHandling.Functions
 {
+    // POCO class 来实现 azure function
     public class MessageConsumerFunctions
     {
         private readonly IServiceProvider _serviceProvider;
@@ -19,8 +20,10 @@ namespace MasstransitErrorHandling.Functions
             _serviceProvider = serviceProvider;
         }
 
+        // 通过 Azure Functions 的 attribute 来定义 function method
         [FunctionName(nameof(MessageConsumerFunction))]
         public async Task MessageConsumerFunction(
+            // 定义 trigger 类型，由 asb queue 中的 message 来 trigger
             [ServiceBusTrigger("%QueueName%", Connection = "AzureWebJobsServiceBus")]
             Message message,
             ILogger logger,
@@ -29,6 +32,7 @@ namespace MasstransitErrorHandling.Functions
         {
             logger.LogInformation($"MessageConsumerFunction: consuming message {message.MessageId}");
 
+            // 创建真正来处理消息的 receiver
             var receiver = Bus.Factory.CreateBrokeredMessageReceiver(binder, cfg =>
             {
                 cfg.CancellationToken = cancellationToken;
